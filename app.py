@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request
 import joblib
 from groq import Groq
-import requests
 
 import os
+
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 app = Flask(__name__)
@@ -71,15 +71,14 @@ def prediction():
     pred = model.predict([[q]])
     return(render_template("prediction.html",r=pred))
 
+import requests
+
 @app.route("/telegram",methods=["GET","POST"])
 def telegram():
-
     domain_url = 'https://groq-dbs-prediction-sa0y.onrender.com'
-
     # The following line is used to delete the existing webhook URL for the Telegram bot
     delete_webhook_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/deleteWebhook"
     requests.post(delete_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
-
     # Set the webhook URL for the Telegram bot
     set_webhook_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook?url={domain_url}/webhook"
     webhook_response = requests.post(set_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
@@ -88,12 +87,10 @@ def telegram():
         status = "The telegram bot is running. Please check with the telegram bot. @dsai_selena_bot"
     else:
         status = "Failed to start the telegram bot. Please check the logs."
-    
     return(render_template("telegram.html", status=status))
 
 @app.route("/webhook",methods=["GET","POST"])
 def webhook():
-
     # This endpoint will be called by Telegram when a new message is received
     update = request.get_json()
     if "message" in update and "text" in update["message"]:
@@ -124,3 +121,4 @@ def webhook():
 
 if __name__ == "__main__":
     app.run()
+

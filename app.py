@@ -5,7 +5,6 @@ import requests
 
 import os
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-# for cloud ..........
 
 app = Flask(__name__)
 
@@ -39,6 +38,26 @@ def llama_reply():
     )
     return(render_template("llama_reply.html",r=completion.choices[0].message.content))
 
+@app.route("/deepseek",methods=["GET","POST"])
+def deepseek():
+    return(render_template("deepseek.html"))
+
+@app.route("/deepseek_reply",methods=["GET","POST"])
+def deepseek_reply():
+    q = request.form.get("q")
+    # load model
+    client = Groq()
+    completion_ds = client.chat.completions.create(
+        model="deepseek-r1-distill-llama-70b",
+        messages=[
+            {
+                "role": "user",
+                "content": q
+            }
+        ]
+    )
+    return(render_template("deepseek_reply.html",r=completion_ds.choices[0].message.content))
+
 @app.route("/dbs",methods=["GET","POST"])
 def dbs():
     return(render_template("dbs.html"))
@@ -64,7 +83,6 @@ def telegram():
     # Set the webhook URL for the Telegram bot
     set_webhook_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook?url={domain_url}/webhook"
     webhook_response = requests.post(set_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
-
     if webhook_response.status_code == 200:
         # set status message
         status = "The telegram bot is running. Please check with the telegram bot. @dsai_selena_bot"
@@ -106,4 +124,3 @@ def webhook():
 
 if __name__ == "__main__":
     app.run()
-
